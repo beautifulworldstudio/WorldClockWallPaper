@@ -1,0 +1,9 @@
+﻿ { "selection" :[{ "cityname" : "beijing"}, 
+  { "cityname" : "chicago" },
+  { "cityname" : "london" },
+  { "cityname" : "losangels"},
+  { "cityname" : "moscow"},
+  { "cityname" : "newyork"},
+  { "cityname" : "sydney"},
+  { "cityname" : "tokyo"}
+ ]}

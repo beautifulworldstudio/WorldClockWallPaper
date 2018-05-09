@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+      package="app.util.livewalllpaper"
+      android:versionCode="3"
+      android:versionName="1.2">
+
+      <uses-sdk android:minSdkVersion="17" />
+      <application android:icon="@drawable/thumbnail"
+                 android:label="@string/wallpaper_name">
+      <service android:name=".WorldClock"
+                android:label="@string/wallpaper_name"
+                android:permission="android.permission.BIND_WALLPAPER">
+         <intent-filter>
+           <action android:name="android.service.wallpaper.WallpaperService" />
+         </intent-filter>
+         <meta-data
+          android:name="android.service.wallpaper"
+          android:resource="@xml/wallpaper" />
+      </service>
+          <activity
+            android:name=".ClockSelectionActivity"
+            android:theme="@android:style/Theme.DeviceDefault.Light"
+            android:exported="true" />
+    </application>
+</manifest> 

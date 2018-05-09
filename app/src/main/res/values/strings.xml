@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+ <string name="hello">Hello World, WorldClock!</string>
+ <string name="wallpaper_name">World Clock Map</string>
+ <string name="explain_text">時計を表示する都市を選択します</string>
+ <string name="text">ここに設定画面をつくります</string>
+ <string name="selection_city">The list</string>
+ <string name="description_seletion">地図上に表示する都市を選びます</string>
+ <string name="description">Live Wallpaper showing daylight and night side of the earth.</string>
+</resources>
