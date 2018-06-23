@@ -1,25 +1,10 @@
 package app.util.livewalllpaper;
 
-import android.app.Activity;
 import android.graphics.Point;
-import android.os.Bundle;
-import android.os.Handler;
 import android.service.wallpaper.WallpaperService;
-import android.service.wallpaper.WallpaperService.Engine;
-import android.util.Log;
 import android.view.Display;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.Rect;
-import android.content.res.Resources;
-import android.content.BroadcastReceiver;
-import android.content.Intent;
-import android.content.Context;
-import android.view.Surface;
 import android.content.IntentFilter;
 import android.view.WindowManager;
 
@@ -27,6 +12,10 @@ public class WorldClock extends WallpaperService
  {
   private int counter;   //
   public static String msg ="message";
+  private static WorldClockEngine engine;
+  //モードの文字列定数
+  public static final String MODE_SINGLE = "Singlemap";
+  public static final String MODE_MULTIPLE = "Multimap";
 
   @Override
   public void onCreate()
@@ -37,27 +26,41 @@ public class WorldClock extends WallpaperService
   @Override
   public Engine onCreateEngine()
    {
-    return new WorldClockEngine();
+    engine = new WorldClockEngine();
+    return engine;
    }
 
   @Override
   public void onDestroy() { }
-  
+
+/*
+  public static int getDisplayMode()
+   {
+    return engine.getMapRenderer().getMode();
+   }
+
+  public static void setDisplayMode(int value)
+   {
+    engine.getMapRenderer().setMode(value);
+   }
+*/
   class WorldClockEngine extends Engine
    {
-    private MapRenderer renderer; //
+    private SingleWorldMapRenderer renderer; //
     private Thread renderthread;
+
+    public SingleWorldMapRenderer getMapRenderer(){ return renderer; }
 
     @Override
     public void onCreate(SurfaceHolder surfaceHolder)
      {
       WindowManager winmanager = (WindowManager) getSystemService(WINDOW_SERVICE);
-      Display disp = winmanager.getDefaultDisplay();
+      //Display disp = winmanager.getDefaultDisplay();
       Point realsize = new Point();
-      disp.getRealSize(realsize);
-      renderer = new MapRenderer();
+      winmanager.getDefaultDisplay().getRealSize(realsize);
+      renderer = new SingleWorldMapRenderer();
 
-      renderer.initialize(WorldClock.this, surfaceHolder, realsize.x, realsize.y);
+      renderer.initialize(WorldClock.this, surfaceHolder, realsize);
 
       registerReceiver(renderer, new IntentFilter("android.intent.action.TIME_TICK"));
       renderthread = new Thread(renderer);
@@ -109,4 +112,5 @@ public class WorldClock extends WallpaperService
     public void onTouchEvent(MotionEvent event) {}
     }
    //the end of WorldClockEngine
+
   }

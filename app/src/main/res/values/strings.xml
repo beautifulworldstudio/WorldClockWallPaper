@@ -1,10 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
- <string name="hello">Hello World, WorldClock!</string>
- <string name="wallpaper_name">World Clock Map</string>
- <string name="explain_text">時計を表示する都市を選択します</string>
- <string name="text">ここに設定画面をつくります</string>
- <string name="selection_city">The list</string>
- <string name="description_seletion">地図上に表示する都市を選びます</string>
- <string name="description">Live Wallpaper showing daylight and night side of the earth.</string>
+    <string name="wallpaper_name">World Clock Map</string>
+    <string name="slidemap_ja">8秒ごとに地図をスライド</string>
+    <string name="slidemap_en">Slide map in every 8 seconds</string>
+    <string name="slidemap_explain_ja">8秒ごとに世界地図の表示位置を切り替えます</string>
+    <string name="slidemap_explain_en">This changes displaying part of the world map every 8 seconds.</string>
+    <string name="roundglobe_ja">常に表示位置をを動かす</string>
+    <string name="roundglobe_en">Always move the map</string>
+    <string name="roundglobe_explain_ja">地球儀のように地図を動かし続けます</string>
+    <string name="roundglobe_explain_en">This always moves map like a globe </string>
+    <string name="selectcity_en">Select city to display</string>
+    <string name="selectcity_ja">表示する都市を選ぶ</string>
+    <string name ="description">A live wallpapaer which displays time of cities all around the world.</string>>
+    <string name ="selectable_ja">選択できる都市</string>
+    <string name ="selectable_en">selectable cities</string>
 </resources>

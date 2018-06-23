@@ -2,10 +2,45 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
       android:layout_width="match_parent"
       android:layout_height="match_parent">
- <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+　 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
       android:id="@+id/listbase"
       android:orientation="vertical"
       android:layout_width="match_parent"
       android:layout_height="match_parent">
- </LinearLayout>
+
+    <RadioGroup xmlns:android="http://schemas.android.com/apk/res/android"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent">
+
+      <RadioButton android:text="@string/slidemap_en"
+                   android:id="@+id/RadioButton1"
+                   android:layout_height="wrap_content"
+                   android:layout_width="wrap_content">
+      </RadioButton>
+      <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+                      android:id="@+id/slidemodetext"
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:layout_marginBottom="20px"
+                      android:text="@string/slidemap_explain_en" />
+
+      <RadioButton android:text="@string/roundglobe_en"
+                   android:id="@+id/RadioButton2"
+                   android:layout_width="wrap_content"
+                   android:layout_height="wrap_content">
+      </RadioButton>
+      <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+                   android:id="@+id/globemodetext"
+                   android:layout_width="match_parent"
+                   android:layout_height="wrap_content"
+                   android:layout_marginBottom="20px"
+                   android:text="@string/roundglobe_explain_en" />
+    </RadioGroup>
+    <Button xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/selectbutton"
+            android:text="表示する都市を選ぶ"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"/>
+</LinearLayout>
 </ScrollView>

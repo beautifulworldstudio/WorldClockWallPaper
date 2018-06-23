@@ -2,7 +2,9 @@ package app.util.livewalllpaper;
 
 //import android.preference.PreferenceActivity;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Point;
@@ -10,11 +12,14 @@ import android.os.Bundle;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.view.View;
 import android.util.Log;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -38,11 +43,15 @@ import java.util.Locale;
   private static final String defaultpostfix ="_small";
   private static final String xhdpipostfix ="_xhdpi";
   private static final String xxhdpipostfix ="_xxhdpi";
-  private static final String settingfilename = "clockselection.json";
+  private static final String clocksettingfile = "clockselection.json";
+  private static final String modesettingfilename="modeselection.json";
   private static final String initialset = "initialsetting";
   private ArrayList<String> selectlist;
   private String[] citynames;
+  private String[] displaynames;
   private String sizeIdentifier="";
+  private String maptype;
+  private String displaymode;
 
   static class ViewHolder
    {
@@ -55,10 +64,6 @@ import java.util.Locale;
   public void onCreate(Bundle savedInstanceState)
    {
     super.onCreate(savedInstanceState);
-
-    //ロケールを取得
-    if(!Locale.getDefault().getLanguage().equals("ja")){ setTitle("The list of selectable cities");}
-    else setTitle("選択できる都市のリスト");
 
     setContentView(R.layout.selecter);
 
@@ -80,16 +85,115 @@ import java.util.Locale;
       sizeIdentifier = defaultpostfix;
      }
     selectlist = getSelectedItems();
-    citynames = getAllItems();
 
-    createCityList();
+    String[][] clockstrings = getAllItems();
+    citynames = clockstrings[0];
+    displaynames = clockstrings[1];
+
+    Button btn =(Button)findViewById(R.id.selectbutton);
+    btn.setOnClickListener(new View.OnClickListener()
+     {
+      @Override
+      public void onClick(View view)
+       {
+        dialog3(ClockSelectionActivity.this);
+       }
+     });
+
+    RadioButton globemode = (RadioButton)findViewById(R.id.RadioButton2);
+    RadioButton mapmode = (RadioButton)findViewById(R.id.RadioButton1);
+
+    globemode.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
+     {
+      @Override
+      public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
+       {
+        if(isChecked)
+         {
+          maptype = WorldClock.MODE_SINGLE;
+          displaymode = SingleWorldMapRenderer.GLOBEVIEW;
+          writeDisplayMode();
+         }
+       }
+     });
+
+    mapmode.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
+     {
+      @Override
+      public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
+       {
+        if(isChecked)
+         {
+          maptype = WorldClock.MODE_SINGLE;
+          displaymode = SingleWorldMapRenderer.MAPVIEW;
+          writeDisplayMode();
+         }
+       }
+     });
+
+    //ロケールによる表示テキストの変更を加える
+    if(Locale.getDefault().getLanguage().equals("ja"))
+     {
+      setTitle("ワールドクロックマップの設定");
+
+      globemode.setText(R.string.roundglobe_ja);
+      globemode.setTextSize(realsize.y / 50);
+      mapmode.setText(R.string.slidemap_ja);
+      mapmode.setTextSize(realsize.y / 50);
+
+      TextView globemodetext = (TextView)findViewById(R.id.globemodetext);
+      globemodetext.setText(R.string.roundglobe_explain_ja);
+      globemodetext.setTextSize(realsize.y / 70);
+
+      TextView slidemodetext = (TextView)findViewById(R.id.slidemodetext);
+      slidemodetext.setText(R.string.slidemap_explain_ja);
+      slidemodetext.setTextSize(realsize.y / 70);
+
+      btn.setText(R.string.selectcity_ja);
+      btn.setTextSize(realsize.y / 50);
+     }
+    else
+     {
+      setTitle("Settings of World Clock Map");
+
+      globemode.setText(R.string.roundglobe_en);
+      globemode.setTextSize(realsize.y / 50);
+      mapmode.setText(R.string.slidemap_en);
+      mapmode.setTextSize(realsize.y / 50);
+      TextView globemodetext = (TextView)findViewById(R.id.globemodetext);
+      globemodetext.setText(R.string.roundglobe_explain_en);
+      globemodetext.setTextSize(realsize.y / 70);
+
+      TextView slidemodetext = (TextView)findViewById(R.id.slidemodetext);
+      slidemodetext.setText(R.string.slidemap_explain_en);
+      slidemodetext.setTextSize(realsize.y / 70);
+
+      btn.setText(R.string.selectcity_en);
+      btn.setTextSize(realsize.y / 50);
+     }
+
+    //ラジオボタンをセットする
+    getDisplayMode(this);
+    if(maptype.equals(WorldClock.MODE_SINGLE) && displaymode.equals(SingleWorldMapRenderer.GLOBEVIEW))
+     {
+      globemode.setChecked(true);
+     }
+    else if(maptype.equals(WorldClock.MODE_SINGLE) && displaymode.equals(SingleWorldMapRenderer.MAPVIEW))
+     {
+      mapmode.setChecked(true);
+     }
+    else//エラー。単一地図・スライド方式にチェック
+     {
+      mapmode.setChecked(true);
+     }
    }
 
   @Override
   public void onStop()
    {
     super.onStop();
-    writeJsonData();
+//    writeJsonData();
+//    writeDisplayMode();
    }
 
   @Override
@@ -97,7 +201,7 @@ import java.util.Locale;
    {
     super.onDestroy();
    }
-
+/*
   private void createCityList()
    {
     LinearLayout base = findViewById(R.id.listbase);
@@ -136,12 +240,12 @@ import java.util.Locale;
       base.addView(view);
      }
    }
-
+*/
   private ArrayList<String> getSelectedItems()
    {
     Context context = this;
     String selectionjsonstring = null;
-    File file = new File(context.getFilesDir(), settingfilename);
+    File file = new File(context.getFilesDir(), clocksettingfile);
 
     //設定ファイルが存在する場合
     if (file.exists())
@@ -206,18 +310,19 @@ import java.util.Locale;
     return citynames;
    }
 
-  private String[] getAllItems()
+  private String[][] getAllItems()
    {
     Context context = this;
     Resources res = context.getResources();
     String packagename = context.getPackageName();
+    String[][] result = new String[2][];
 
     //時計の位置を記述したjsonファイルを読み込む
     final int id = res.getIdentifier(clockpositionjson + sizeIdentifier, "raw", packagename);
 
     if (id == 0)
      {    //エラーにはならない
-      return new String[0];
+      return result;
      }
 
     JSONArray dataarray = null;
@@ -226,26 +331,93 @@ import java.util.Locale;
       InputStream is = res.openRawResource(id);
       dataarray =  new JSONObject(loadText(is)).getJSONArray("datas");
      }
-    catch(Exception e){ /*Log.d("Worldclock","error initspinner " + e.toString() );*/ return new String[0];}
+    catch(Exception e){ /*Log.d("Worldclock","error initspinner " + e.toString() );*/ return new String[2][0];}
 
-    ArrayList<String> citynames= new ArrayList<String>();
+    ArrayList<String> citynamesArray = new ArrayList<String>();
+    ArrayList<String> displaynamesArray = new ArrayList<String>();
 
     for (int i = 0; i < dataarray.length(); i++)
      {
       try
        {
         JSONObject entry = dataarray.getJSONObject(i);
-        citynames.add(entry.getString("cityname"));
+        String citynamedata = entry.getString("cityname");
+        String displaynamedata =entry.getString("displayname");
+
+        //例外が発生しなければ代入する
+        citynamesArray.add(citynamedata);
+        displaynamesArray.add(displaynamedata)         ;
        }
       catch (Exception e){ continue; }
      }
-    String[] result = new String[citynames.size()];
-    for(int i = 0;i < citynames.size();i++)
+
+    //数が一致しないときは要素数０で返す
+    if(citynamesArray.size() != displaynamesArray.size()) return result;
+
+    //登録名（cityname）を格納する
+    result[0] = new String[citynamesArray.size()];
+    for(int i = 0;i < citynamesArray.size();i++)
      {
-      result[i] = citynames.get(i);
+      result[0][i] = citynamesArray.get(i);
      }
 
+    //表示名（displayname）を格納する
+    result[1] = new String[displaynamesArray.size()];
+    for(int i = 0;i < displaynamesArray.size();i++)
+     {
+      result[1][i] = displaynamesArray.get(i);
+    }
+
     return result;
+   }
+
+  private void getDisplayMode(Context context)
+   {
+    String jsonstring = null;
+    File file = new File(context.getFilesDir(), modesettingfilename);
+
+    //設定ファイルが存在する場合
+    if (file.exists())
+     {
+      try
+       {
+        FileInputStream fis = new FileInputStream(file);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        byte[] buffer= new byte[1024];
+        int read = 0;
+        while((read = fis.read(buffer)) > 0)
+         {
+          baos.write(buffer, 0, read);
+         }
+
+        jsonstring = new String(baos.toByteArray());
+        fis.close();
+        baos.close();
+       }
+      catch(IOException e){}
+     }
+
+    if(jsonstring != null)
+     {
+      JSONObject mode = null;
+      try
+       {
+        mode = new JSONObject(jsonstring);
+        maptype = mode.getString("mapmode");
+        displaymode = mode.getString("displaymode");
+
+        //Log.d("worldclock", "map=" + maptype + " mode=" + displaymode);
+       }
+      catch(Exception e){}
+     }
+
+    //設定ファイルが存在しない場合、または読み込みに失敗した場合
+    if(jsonstring == null | maptype == null | displaymode == null)
+     {
+      //1枚地図・時間ごとにスライドする方式を指定する
+      maptype = WorldClock.MODE_SINGLE;
+      displaymode = SingleWorldMapRenderer.MAPVIEW;
+     }
    }
 
   private String loadText(InputStream is)throws IOException
@@ -265,6 +437,7 @@ import java.util.Locale;
     return result;
    }
 
+  //都市を選んだ時のイベントリスナ
   @Override
   public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
    {
@@ -294,18 +467,22 @@ import java.util.Locale;
      }
    }
 
-   /*
+  //都市名表示のダイアログ
   public void dialog3(Context context)
    {
     AlertDialog.Builder builder = new AlertDialog.Builder(context);
-    builder.setTitle("表示できる都市");
+
+    if(Locale.getDefault().getLanguage().equals("ja")) builder.setTitle(R.string.selectable_ja);
+    else builder.setTitle(R.string.selectcity_en);
 
     final String[] items = citynames;
     final boolean[] check = new boolean[items.length];
+
     for (int i = 0; i < selectlist.size(); i++)
      {
       String selected = selectlist.get(i);
-         Log.d("Worldclock", "selected city=" +selected);
+      //Log.d("Worldclock", "selected city=" +selected);
+
       for (int j = 0; j < items.length; j++)
        {
         if (selected.equals(items[j]))
@@ -327,7 +504,7 @@ import java.util.Locale;
        }
      };
 
-    builder.setMultiChoiceItems(items, check, mCheckListener);
+    builder.setMultiChoiceItems(displaynames, check, mCheckListener);
 
     // ボタンのリスナー //
     DialogInterface.OnClickListener mButtonListener = new DialogInterface.OnClickListener()
@@ -367,10 +544,10 @@ import java.util.Locale;
     AlertDialog dialog = builder.create();
     dialog.show();
    }
-*/
+
   private void writeJsonData()
    {
-    File file = new File(getFilesDir(), settingfilename);
+    File file = new File(getFilesDir(), clocksettingfile);
 
     try
      {
@@ -387,6 +564,22 @@ import java.util.Locale;
       FileOutputStream fos =new FileOutputStream(file);
       fos.write(result.toString().getBytes("UTF-8"));
      }
-    catch(Exception e){Log.d("Worldclock", e.toString());}
+    catch(Exception e){ /*Log.d("Worldclock", e.toString());*/}
+   }
+
+  private void writeDisplayMode()
+   {
+    File file = new File(getFilesDir(), modesettingfilename);
+
+    try
+     {
+      JSONObject result = new JSONObject();
+      result.put("mapmode", maptype);
+      result.put("displaymode", displaymode);
+
+      FileOutputStream fos =new FileOutputStream(file);
+      fos.write(result.toString().getBytes("UTF-8"));
+     }
+    catch(Exception e){ /*Log.d("Worldclock", e.toString());*/ }
    }
  }
